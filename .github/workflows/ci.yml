@@ -21,9 +21,9 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/astrolunet/trocto.git /tmp/trocto
           cd /tmp/trocto
-          cmake -B build -DCMAKE_BUILD_TYPE=Release
-          cmake --build build --config Release
-          sudo cp build/trocto /usr/local/bin/trocto
+          cmake --preset release
+          cmake --build --preset release
+          sudo cp build/release/trocto /usr/local/bin/trocto
           trocto --version || echo "trocto built"
 
       - name: Compile contracts
