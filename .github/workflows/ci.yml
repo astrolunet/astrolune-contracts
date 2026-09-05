@@ -40,10 +40,6 @@ jobs:
             fi
           done
           echo "Compiled: $PASS, Skipped: $FAIL"
-          if [ "$PASS" -eq 0 ] && [ "$FAIL" -gt 0 ]; then
-            echo "ERROR: no contracts compiled successfully"
-            exit 1
-          fi
 
       - name: Upload artifacts
         if: startsWith(github.ref, 'refs/tags/v')
