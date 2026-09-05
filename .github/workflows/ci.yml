@@ -17,6 +17,16 @@ jobs:
         run: |
           curl -sL https://github.com/astrolunet/trocto/releases/latest/download/trocto-linux -o /usr/local/bin/trocto
           chmod +x /usr/local/bin/trocto
+        continue-on-error: true
+
+      - name: Build Trocto from source
+        if: failure()
+        run: |
+          git clone https://github.com/astrolunet/trocto.git /tmp/trocto
+          cd /tmp/trocto
+          cmake --preset dev
+          cmake --build --preset dev
+          sudo cp build/dev/trocto /usr/local/bin/trocto
 
       - name: Compile contracts
         run: |
