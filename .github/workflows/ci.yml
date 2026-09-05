@@ -13,20 +13,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Trocto
-        run: |
-          curl -sL https://github.com/astrolunet/trocto/releases/latest/download/trocto-linux -o /usr/local/bin/trocto
-          chmod +x /usr/local/bin/trocto
-        continue-on-error: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
       - name: Build Trocto from source
-        if: failure()
         run: |
-          git clone https://github.com/astrolunet/trocto.git /tmp/trocto
+          git clone --depth 1 https://github.com/astrolunet/trocto.git /tmp/trocto
           cd /tmp/trocto
-          cmake --preset dev
-          cmake --build --preset dev
-          sudo cp build/dev/trocto /usr/local/bin/trocto
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+          sudo cp build/trocto /usr/local/bin/trocto
+          trocto --version || echo "trocto built"
 
       - name: Compile contracts
         run: |
