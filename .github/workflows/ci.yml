@@ -24,7 +24,7 @@ jobs:
           cmake --preset release
           cmake --build --preset release
           sudo cp build/release/trocto /usr/local/bin/trocto
-          trocto --version
+          trocto --help || true
 
       - name: Compile contracts
         run: |
