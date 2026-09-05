@@ -1,12 +1,12 @@
-// ProxyRegistry - on-chain registry for proxy and exit nodes in the Astrolune VPN.
+// ProxyRegistry - on-chain registry for proxy and exit nodes in the Astrolune network.
 //
 // Tracks node capabilities, endpoints, reputation scores, staked deposits,
 // and exit node status. Nodes must register and stake before participating
 // in the network.
 //
 // Compile:
-//     trocto contracts/vpn/proxy_registry.tc -o proxy_registry.bin
-//     trocto contracts/vpn/proxy_registry.tc --emit-regol
+//     trocto contracts/proxy/proxy_registry.tc -o proxy_registry.bin
+//     trocto contracts/proxy/proxy_registry.tc --emit-regol
 
 contract ProxyRegistry {
     state {
