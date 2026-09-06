@@ -10,8 +10,12 @@ on:
 jobs:
   compile:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@v5
         with:
@@ -24,22 +28,23 @@ jobs:
           cmake --preset release
           cmake --build --preset release
           sudo cp build/release/trocto /usr/local/bin/trocto
-          trocto --help || true
+          trocto --help
 
       - name: Compile contracts
         run: |
+          set -euo pipefail
           PASS=0
-          FAIL=0
-          for f in $(find . -name "*.tc"); do
+          mapfile -d '' files < <(find . -name '*.tc' -print0)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No .tc contracts found" >&2
+            exit 1
+          fi
+          for f in "${files[@]}"; do
             echo "Compiling $f..."
-            if trocto "$f" -o "${f%.tc}.bin" 2>&1; then
-              PASS=$((PASS + 1))
-            else
-              echo "  (skipped - compile error)"
-              FAIL=$((FAIL + 1))
-            fi
+            trocto "$f" -o "${f%.tc}.bin"
+            PASS=$((PASS + 1))
           done
-          echo "Compiled: $PASS, Skipped: $FAIL"
+          echo "Compiled: $PASS"
 
       - name: Upload artifacts
         if: startsWith(github.ref, 'refs/tags/v')

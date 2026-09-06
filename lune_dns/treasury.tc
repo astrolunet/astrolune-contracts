@@ -8,7 +8,7 @@ contract LuneTreasury {
     state {
         owner: address,
         total_fees: u64,
-        fee_recipient: u64,
+        fee_recipient: address,
         protocol_fee_percent: u64,
         min_registration_payment: u64,
     }
@@ -52,7 +52,7 @@ contract LuneTreasury {
     }
 
     // Update fee recipient. Only owner.
-    pub fn set_fee_recipient(new_recipient: u64) {
+    pub fn set_fee_recipient(new_recipient: address) {
         require(sender() == self.owner, 5);
         self.fee_recipient = new_recipient;
     }

@@ -20,9 +20,9 @@ contract StorageAgreement {
         owner: address,
         agreement_count: u64,
         agreements: map<u64,u64>,
-        provider_agreements: map<u64,u64>,
-        agreement_client: map<u64,u64>,
-        agreement_provider_addr: map<u64,u64>,
+        provider_agreements: map<address,u64>,
+        agreement_client: map<u64,address>,
+        agreement_provider_addr: map<u64,address>,
         agreement_status: map<u64,u64>,
         agreement_start: map<u64,u64>,
         agreement_duration: map<u64,u64>,
@@ -70,7 +70,6 @@ contract StorageAgreement {
     // storage_key: identifier for the data being stored
     // Returns the agreement_id.
     pub fn create_agreement(provider: address, duration: u64, replication: u64, storage_key: u64) -> u64 {
-        require(provider != 0, 1);
         require(duration > 0, 2);
         require(replication > 0, 3);
         require(storage_key != 0, 4);
@@ -94,10 +93,8 @@ contract StorageAgreement {
     // Provider accepts an agreement. Only the registered provider may call.
     // Sets status to active.
     pub fn accept_agreement(agreement_id: u64) {
-        let provider = agreement_provider_addr[agreement_id];
-        require(provider != 0, 6);
         require(agreement_status[agreement_id] == 0, 7);
-        require(sender() == provider, 8);
+        require(sender() == agreement_provider_addr[agreement_id], 8);
         agreement_status[agreement_id] = 1;
     }
 
@@ -158,13 +155,19 @@ contract StorageAgreement {
     }
 
     // Get the client address of an agreement.
-    pub fn get_client(agreement_id: u64) -> address {
-        return agreement_client[agreement_id];
+    pub fn is_client(agreement_id: u64, client: address) -> u64 {
+        if (agreement_client[agreement_id] == client) {
+            return 1;
+        }
+        return 0;
     }
 
     // Get the provider address of an agreement.
-    pub fn get_provider(agreement_id: u64) -> address {
-        return agreement_provider_addr[agreement_id];
+    pub fn is_provider(agreement_id: u64, provider: address) -> u64 {
+        if (agreement_provider_addr[agreement_id] == provider) {
+            return 1;
+        }
+        return 0;
     }
 
     // Get agreement status.

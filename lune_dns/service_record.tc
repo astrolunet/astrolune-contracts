@@ -84,8 +84,8 @@ contract LuneServiceRecord {
         service_heartbeats[service_id] = height();
 
         // Add to domain service list
-        let domain_count = self.domain_service_count[domain_hash];
-        self.domain_service_count[domain_hash] = domain_count + 1;
+        let domain_count = domain_service_count[domain_hash];
+        domain_service_count[domain_hash] = domain_count + 1;
 
         emit ServiceRegistered(domain_hash, service_id, sender(), endpoint, port);
         return service_id;
@@ -209,7 +209,7 @@ contract LuneServiceRecord {
 
     // Get the number of services for a domain.
     pub fn get_domain_service_count(domain_hash: u64) -> u64 {
-        return self.domain_service_count[domain_hash];
+        return domain_service_count[domain_hash];
     }
 
     // Get total number of registered services.

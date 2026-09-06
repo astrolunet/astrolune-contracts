@@ -59,15 +59,11 @@ contract LuneRegistrar {
         require(height() <= expiry, 3);
         require(duration >= self.min_registration_duration, 4);
         require(duration <= self.max_registration_duration, 5);
-        let price = calculate_price(duration);
+        let price = self.base_price * duration;
         commit_hashes[commit_hash] = 0;
         let registration_expiry = height() + duration;
         emit RegistrationCompleted(domain_hash, sender(), registration_expiry);
         return registration_expiry;
     }
 
-    // Calculate registration price based on duration.
-    pub fn calculate_price(duration: u64) -> u64 {
-        return self.base_price * duration;
-    }
 }

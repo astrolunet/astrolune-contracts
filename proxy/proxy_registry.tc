@@ -1,7 +1,7 @@
-// ProxyRegistry - on-chain registry for proxy and exit nodes in the Astrolune network.
+// ProxyRegistry - on-chain registry for proxy nodes in the Astrolune network.
 //
 // Tracks node capabilities, endpoints, reputation scores, staked deposits,
-// and exit node status. Nodes must register and stake before participating
+// and proxy status. Nodes must register and stake before participating
 // in the network.
 //
 // Compile:
@@ -12,12 +12,12 @@ contract ProxyRegistry {
     state {
         owner: address,
         node_count: u64,
-        nodes: map<u64,u64>,
+        nodes: map<u64,address>,
         node_capabilities: map<u64,u64>,
         node_endpoints: map<u64,u64>,
         node_deposits: map<u64,u64>,
         node_reputation: map<u64,u64>,
-        exit_nodes: map<u64,u64>,
+        proxy_nodes: map<u64,u64>,
         node_uptime: map<u64,u64>,
         node_quality: map<u64,u64>,
         node_status: map<u64,u64>,
@@ -41,11 +41,11 @@ contract ProxyRegistry {
         refund: u64,
     }
 
-    event ExitNodeEnabled {
+    event ProxyNodeEnabled {
         node_id: u64,
     }
 
-    event ExitNodeDisabled {
+    event ProxyNodeDisabled {
         node_id: u64,
     }
 
@@ -56,7 +56,7 @@ contract ProxyRegistry {
     }
 
     // Register a new proxy node. Caller must send a deposit.
-    // capabilities: bitmask of supported features (1=ipv4, 2=ipv6, 4=socks5, 8=wireguard)
+    // capabilities: bitmask of supported features (1=ipv4, 2=ipv6, 4=socks5)
     // endpoint: encoded endpoint identifier (e.g. multiaddr hash)
     // Returns the node_id.
     pub fn register_node(capabilities: u64, endpoint: u64) -> u64 {
@@ -74,7 +74,7 @@ contract ProxyRegistry {
         node_uptime[node_id] = 100;
         node_quality[node_id] = 100;
         node_status[node_id] = 1;
-        exit_nodes[node_id] = 0;
+        proxy_nodes[node_id] = 0;
         emit NodeRegistered(node_id, sender(), capabilities, deposit);
         return node_id;
     }
@@ -98,7 +98,7 @@ contract ProxyRegistry {
         let refund = node_deposits[node_id];
         node_status[node_id] = 0;
         node_deposits[node_id] = 0;
-        exit_nodes[node_id] = 0;
+        proxy_nodes[node_id] = 0;
         if (refund > 0) {
             pay(sender(), refund);
         }
@@ -106,22 +106,22 @@ contract ProxyRegistry {
         return refund;
     }
 
-    // Enable exit node capability for a node. Only the node operator may call.
-    // Node must have the exit capability bit (16) set in its capabilities.
-    pub fn enable_exit_node(node_id: u64) {
+    // Enable proxy capability for a node. Only the node operator may call.
+    // Node must have the proxy capability bit (4) set in its capabilities.
+    pub fn enable_proxy_node(node_id: u64) {
         require(nodes[node_id] == sender(), 4);
         require(node_status[node_id] == 1, 5);
-        require(node_capabilities[node_id] & 16 == 16, 6);
-        exit_nodes[node_id] = 1;
-        emit ExitNodeEnabled(node_id);
+        require(node_capabilities[node_id] & 4 == 4, 6);
+        proxy_nodes[node_id] = 1;
+        emit ProxyNodeEnabled(node_id);
     }
 
-    // Disable exit node capability. Only the node operator may call.
-    pub fn disable_exit_node(node_id: u64) {
+    // Disable proxy capability. Only the node operator may call.
+    pub fn disable_proxy_node(node_id: u64) {
         require(nodes[node_id] == sender(), 4);
         require(node_status[node_id] == 1, 5);
-        exit_nodes[node_id] = 0;
-        emit ExitNodeDisabled(node_id);
+        proxy_nodes[node_id] = 0;
+        emit ProxyNodeDisabled(node_id);
     }
 
     // Record uptime for a node. Only callable by contract owner.
@@ -152,8 +152,11 @@ contract ProxyRegistry {
     }
 
     // Get node address.
-    pub fn get_node_addr(node_id: u64) -> address {
-        return nodes[node_id];
+    pub fn is_node_addr(node_id: u64, node_addr: address) -> u64 {
+        if (nodes[node_id] == node_addr) {
+            return 1;
+        }
+        return 0;
     }
 
     // Get node capabilities bitmask.
@@ -191,9 +194,9 @@ contract ProxyRegistry {
         return node_status[node_id];
     }
 
-    // Check if a node is an exit node. Returns 1 if exit node, 0 otherwise.
-    pub fn is_exit_node(node_id: u64) -> u64 {
-        if (exit_nodes[node_id] == 1) {
+    // Check if a node is a proxy node. Returns 1 if proxy node, 0 otherwise.
+    pub fn is_proxy_node(node_id: u64) -> u64 {
+        if (proxy_nodes[node_id] == 1) {
             return 1;
         }
         return 0;

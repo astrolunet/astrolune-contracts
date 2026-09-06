@@ -12,7 +12,7 @@ contract ProviderRegistry {
     state {
         owner: address,
         provider_count: u64,
-        providers: map<u64,u64>,
+        providers: map<u64,address>,
         provider_capabilities: map<u64,u64>,
         provider_deposits: map<u64,u64>,
         provider_endpoints: map<u64,u64>,
@@ -106,8 +106,11 @@ contract ProviderRegistry {
     }
 
     // Get the address of a provider.
-    pub fn get_provider_addr(provider_id: u64) -> address {
-        return providers[provider_id];
+    pub fn is_provider_addr(provider_id: u64, provider_addr: address) -> u64 {
+        if (providers[provider_id] == provider_addr) {
+            return 1;
+        }
+        return 0;
     }
 
     // Get provider capabilities bitmask.

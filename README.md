@@ -21,7 +21,7 @@ Smart contracts for the Astrolune ecosystem, written in Trocto v0.3.
 - `share/retrieval_escrow.tc` — Atomic payment escrow
 
 ### Proxy
-- `proxy/proxy_registry.tc` — Proxy/exit node registry
+- `proxy/proxy_registry.tc` — Proxy node registry
 
 ### Standard Library
 - `stdlib/ownership.tc` — Ownership pattern
